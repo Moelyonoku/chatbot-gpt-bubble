@@ -1,0 +1,35 @@
+const proxyUrl = "https://gpt-proxy.raesyaliyahfa.repl.co/v1/chat/completions";
+
+function addMessage(sender, message) {
+  const chatBox = document.getElementById("chat-box");
+  const msg = document.createElement("div");
+  msg.innerHTML = `<strong>${sender}:</strong> ${message}`;
+  chatBox.appendChild(msg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+async function sendMessage() {
+  const input = document.getElementById("user-input");
+  const userMessage = input.value.trim();
+  if (!userMessage) return;
+
+  addMessage("Anda", userMessage);
+  input.value = "";
+
+  try {
+    const response = await fetch(proxyUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: userMessage }]
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content || "Maaf, tidak ada balasan.";
+    addMessage("Asisten", reply);
+  } catch (error) {
+    addMessage("Asisten", "Terjadi kesalahan.");
+  }
+}
